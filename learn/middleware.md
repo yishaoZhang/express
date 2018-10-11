@@ -62,4 +62,4 @@ app.use(cmw({option1: 1, option2: 2}));
     + all express use create middleware chain
         + if the callback exucate next()
         + the middleware will propagate through middleware chain
-        + opposite: callback's no-exist next() will break up the middleware chain
+        + otherwise: callback's no-exist next() will break up the middleware chain
