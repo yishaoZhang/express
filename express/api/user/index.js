@@ -6,7 +6,6 @@ var jwtCheck = require('../../config/jwtCheck');
 const crypto = require('crypto')
 const userConfigFun = require('./user');
 // 字段是否可以自定义？？？
-const md5 = crypto.createHash('md5');
 const moment = require('moment');
 
 // 登录
@@ -15,7 +14,7 @@ router.post('/login', function(req, res) {
     const md5 = crypto.createHash('md5');
     // 成功
     if (re && re.length && md5.update(req.body.password).digest("hex") === re[0].password) {
-      token = jwt.sign({name: req.body.name, password: re[0].password}, 'xuyishao', {expiresIn: '5h'})
+      token = jwt.sign({name: req.body.name, password: re[0].password}, 'xuyishao', {expiresIn: "5h"})
       res.send(Object.assign(resData.succ(), {token: token}));
     } else {
       res.send(Object.assign(resData.succ(), {code: 4010, message: '账号或密码错误'}));
@@ -43,7 +42,7 @@ router.post('/register', function(req, res) {
       registorData.time = moment().valueOf();
       registorData.origin = '注册';
       userConfigFun.register(registorData, function() {
-        token = jwt.sign({name: req.body.name, password: passW}, 'xuyishao', {expiresIn: '5h'})
+        token = jwt.sign({name: req.body.name, password: passW}, 'xuyishao', {expiresIn: "5h"})
         res.send(Object.assign(
           resData.succ(), 
           {token: token, message: '注册成功'}
@@ -61,7 +60,6 @@ router.post('/register', function(req, res) {
 
 // get  user's list
 router.post('/getUserList', function(req, res) {
-  console.log(req.body, 'req.body')
   let listParams = {};
   Object.keys(req.body).forEach(key => {
     switch (key) {
@@ -73,10 +71,21 @@ router.post('/getUserList', function(req, res) {
   });
   userConfigFun.getUsersList(listParams, { }, function(re) {
     let checkRe = jwtCheck(req.body.token);
+    console.log(checkRe, 'check')
     if (checkRe.code === 401) { // 失效
       res.send(Object.assign(resData.succ(), checkRe));
     } else {
-      res.send(Object.assign(resData.succ(), {data: re}));
+      let reDeal = re.map(item => {
+        let re = {}
+        re.level = item.level;
+        re.levelName = item.levelName;
+        re.origin = item.origin;
+        re.username = item.username;
+        re._id = item._id;
+        re.time = moment(item._id).format("YYYY-MM-DD");
+        return re;
+      })
+      res.send(Object.assign(resData.succ(), {data: reDeal}));
     }
   })
 })

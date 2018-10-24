@@ -23,11 +23,13 @@ const findDocuments = function(db, data, filter, callback) {
 const insertDocument = function(db, data, callback) {
   const collection = db.collection('users');
   collection.insertOne(data, function(err, result) {
-    // console.log(err, result, 'insertDocument')
     callback();
   })
 }
 
+/* 
+  @: data: which to find
+*/
 /* 
   @ data: which to find
 */

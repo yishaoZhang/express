@@ -8,7 +8,10 @@
 + 主要作用，向后兼容 保证当前项目依赖版本稳定性
   + 若无该文件，依赖采用最新发布
 + 文档提示，package-lock.json 将在安装时自动更新
-  + 「jsonwebtoken」安装此，不更新？？
+  + 通过cnpm安装，无法更新package-lock.json
+    + 理由，模块存在跌代过程，即持续修改bug过程
+    + 如果将版本锁住，bug亦被锁住
+    + 稍有抬杠，可以做为面试题，不关注答题，关注抬扛？？？
 
 ## crypto ##
 + 报错  Digest already called
