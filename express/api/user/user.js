@@ -28,9 +28,6 @@ const insertDocument = function(db, data, callback) {
 }
 
 /* 
-  @: data: which to find
-*/
-/* 
   @ data: which to find
 */
 function isUserRegister(data, filter={}, callback) {
@@ -90,9 +87,34 @@ function getUsersList(data, filter={}, callback) {
   });
 }
 
+const removeDocument = function(db, data, callback) {
+  const collection = db.collection('users');
+  collection.deleteOne(data, function(err, result) {
+    if (err) {
+      console.log(err, '111')
+      return;
+    }
+    callback(result);
+  })
+}
+
+function delUser(data, callback) {
+  console.log(data)
+  MongoClient.connect(url, {useNewUrlParser:true}, function(err, client) {
+    if (err) {
+      console.log(err, '6')
+    }
+    const db = client.db(dbName);
+    removeDocument(db, data, function(re) {
+      client.close();
+      callback(re);
+    })
+  });
+}
 
 module.exports = {
   isUserRegister: isUserRegister,
   register: register,
-  getUsersList: getUsersList
+  getUsersList: getUsersList,
+  delUser: delUser
 }

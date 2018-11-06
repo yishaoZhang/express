@@ -23,14 +23,39 @@ router.post('/login', function(req, res) {
 })
 
 router.post('/add', function(req, res) {
+  let temD = {10: '管理员', 20: '普通用户', 30: '访客'};
   let checkRe = jwtCheck(req.body.token);
-  res.send(Object.assign(resData.succ(), checkRe));
+  if (checkRe.code) { // 验证不成功
+    res.send(Object.assign(resData.succ(), checkRe));
+  } else {
+    userConfigFun.isUserRegister({'username': req.body.name}, {'password': 1}, function(re) {
+      if (!re || (re && !re.length)) { // 用户未注册
+        let insertData = {};
+        insertData.level = req.body.roleId;
+        insertData.username = req.body.name;
+        insertData.origin = '管理员添加';
+        insertData.levelName = temD[req.body.roleId];
+        insertData.time = moment().valueOf();
+        const md5 = crypto.createHash('md5');
+        insertData.password = md5.update('000000').digest("hex");
+        userConfigFun.register(insertData, function() {
+          res.send(Object.assign(
+            resData.succ(), 
+            {message: '添加成功'}
+          ));
+        })
+      } else {
+        res.send(Object.assign(
+          resData.succ(), 
+          {message: '该用户名被占用'}
+        ));
+      }
+    });
+  }
 })
-
 // register
 router.post('/register', function(req, res) {
   userConfigFun.isUserRegister({'username': req.body.name}, {'password': 1}, function(re) {
-    console.log(re, 're');
     if (!re || (re && !re.length)) { // 用户未注册 此时re 值为 null
       const md5 = crypto.createHash('md5');
       let passW = md5.update(req.body.password).digest("hex");
@@ -52,7 +77,7 @@ router.post('/register', function(req, res) {
     if (re && re.length) {
       res.send(Object.assign(
         resData.succ(), 
-        {message: '该用户名已被占用'}
+        {message: '该用户名已被占用', code: 4011}
       ));
     }
   })
@@ -82,7 +107,7 @@ router.post('/getUserList', function(req, res) {
         re.origin = item.origin;
         re.username = item.username;
         re._id = item._id;
-        re.time = moment(item._id).format("YYYY-MM-DD");
+        re.time = moment(item.time).format("YYYY-MM-DD");
         return re;
       })
       res.send(Object.assign(resData.succ(), {data: reDeal}));
@@ -90,5 +115,18 @@ router.post('/getUserList', function(req, res) {
   })
 })
 
+// 删除
+// delUser
+router.post('/delUser', function(req, res) {
+  let checkRe = jwtCheck(req.body.token);
+  if (!checkRe.code) {
+    userConfigFun.delUser({username: req.body.username}, function(re) {
+      console.log(re, 're')
+      res.send(Object.assign(resData.succ(), {message: '删除成功'}));
+    })
+  } else {
+    res.send(Object.assign(resData.succ(), checkRe));
+  }
+})
 
 module.exports = router;
